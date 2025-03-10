@@ -1,0 +1,64 @@
+﻿<Window x:Class="CG_project1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CG_project1"
+        mc:Ignorable="d"
+        Title="Editor" Height="450" Width="800" Name="mainWindow">
+    <Grid>
+        <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" CanContentScroll="True" >
+            <DockPanel>
+                <Menu DockPanel.Dock="Top">
+                    <MenuItem Header="File">
+                        <MenuItem Header="Choose picture" Click="MenuItem_Click"/>
+                        <MenuItem Header="Save picture" Click="SavePicture"/>
+                    </MenuItem>
+                    <MenuItem Header="Edit">
+                        <MenuItem Header="Change kernel parameters..." Click="ChangeKernel"/>
+                    </MenuItem>
+                </Menu>
+                <Border BorderThickness="1" BorderBrush="Black" DockPanel.Dock="Left" Width="200"   Margin="5, 5, 5, 5">
+                    <StackPanel Orientation="Vertical">
+                        <Expander Header="Filters" IsExpanded="False">
+                            <StackPanel Orientation="Vertical">
+                                <Button Content="Inversion" Click="Inversion" Margin="5, 5, 5, 5"/>
+                                <Button Content="Brightness correction" Click="Brightness" Margin="5, 5, 5,5"/>
+                                <Button Content="Gamma brightness correction" Click="GammaCorrection" Margin="5, 5, 5, 5"/>
+                                <Button Content="Contrast enhancement" Click="ContrastEnhancement" Margin="5,5,5,5"/>
+                                <Button Content="Median" Click="Median" Margin="5,5,5,5"/>
+                            </StackPanel>
+                        </Expander>
+                        <Expander Header="Convolution filters" IsExpanded="False">
+                            <StackPanel Orientation="Vertical">
+                                <GroupBox Header="Kernel" Name="convFilters">
+                                    <Grid/>
+                                </GroupBox>
+                                <CheckBox Content="Automatically compute divisor" IsChecked="true" Name="autoComputeD"/>
+                                <Button Content="Save kernel" Click="SaveKernel" Margin="5,5,5,5"/>
+                                <ComboBox Name="convFilterChooser" Margin="5,5,5,5"/>
+                                <Button Content="Apply convolution filter" Click="ApplyCFilters"  Margin="5,5,5,5"/>
+                            </StackPanel>
+                        </Expander>
+                        <Expander Header="Colours">
+                            <StackPanel Orientation="Vertical">
+                                <Button Content="Greyscale" Click="Greyscale" Margin="5,5,5,5"/>
+                                <TextBox Name="ditherNr" Text="{Binding colors}" Margin="5,5,5,5"/>
+                                <Button Content="Apply dithering" Click="Dithering" Margin="5,5,5,5"/>
+                                <TextBox Name="colorQNr" Text="{Binding colors}" Margin="5,5,5,5"/>
+                                <Button Content="Quantinize colors" Click="ColorQuant" Margin="5,5,5,5"/>
+                            </StackPanel>
+                        </Expander>
+                        <Button Content="Restore image" Click="Button_Restore" Margin="5,5,5,5"/>
+                    </StackPanel>
+                </Border>
+                <Border BorderThickness="1" BorderBrush="Black" DockPanel.Dock="Right" Margin="5, 5, 5, 5">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Name="originalPicture" Stretch="None"></Image>
+                        <Image Name="modifiedPicture" Stretch="None"></Image>
+                    </StackPanel>
+                </Border>
+            </DockPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
