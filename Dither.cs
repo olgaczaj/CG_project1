@@ -139,6 +139,8 @@ namespace CG_project1
             g.Sort();
             b.Sort();
 
+            count = 0;
+
             List<int[]> thresholds = ComputeThreshold(r, g, b, 1);
 
             byte[] result = new byte[pixels.Length];

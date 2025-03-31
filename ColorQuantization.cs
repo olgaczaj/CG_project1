@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,101 @@ namespace CG_project1
         public int colors { get; set; } = 64;
 
         public byte[] Apply(byte[] pixels)
+        {
+            return KMeans(pixels);
+        }
+
+        public byte[] KMeans(byte[] pixels)
+        {
+            Random random = new Random();
+
+            Pixel[] centroids = new Pixel[colors];
+            for(int i = 0; i < colors; i++)
+            {
+                centroids[i] = new Pixel((byte)random.Next(255), (byte)random.Next(255), (byte)random.Next(255));
+            }
+
+            List<(Pixel, Pixel)> map = new List<(Pixel, Pixel)>();
+            for (int i = 0; i < pixels.Length; i+=4)
+            {
+                var p1 = new Pixel(pixels[i], pixels[i + 1], pixels[i + 2]);
+                var (p2, dist) = p1.FindNearest(centroids);
+
+                map.Add((p1, p2));
+            }
+
+            map = FindCentroids(map, centroids);
+
+            byte[] result = new byte[pixels.Length];
+            for (int i = 0;i < map.Count; i++)
+            {
+                result[4 * i] = map[i].Item2.r;
+                result[4*i+1] = map[i].Item2.g;
+                result[4*i+2] = map[i].Item2.b;
+                result[4 * i + 3] = 0;
+            }
+
+            return result;
+        }
+
+        private List<(Pixel, Pixel)> FindCentroids(List<(Pixel, Pixel)> map, Pixel[] centroids)
+        {
+            Pixel newValue;
+            bool isChanged = true;
+            while (isChanged)
+            {
+                isChanged = false;
+                for (int i = 0; i < colors; i++)
+                {
+                    newValue = AvgPixel(map.FindAll(p => p.Item2 == centroids[i]));
+                    if (newValue != centroids[i])
+                    {
+                        isChanged = true;
+                        centroids[i] = newValue;
+                    }
+                }
+
+                //reassignment
+                for (int i = 0; i < map.Count; i++)
+                {
+                    var (nearest, dist) = map[i].Item1.FindNearest(centroids);
+                    if (nearest != map[i].Item2)
+                    {
+                        isChanged = true;
+                        map[i] = (map[i].Item1, nearest);
+                    }
+                }
+            }
+            return map;
+        }
+
+        private Pixel AvgPixel(List<(Pixel, Pixel)> map)
+        {
+            int sumr = 0, sumg = 0, sumb = 0;
+            foreach (var m in map) {
+                sumr += m.Item1.r;
+                sumg += m.Item1.g;
+                sumb += m.Item1.b;
+            }
+            byte r, g, b;
+            if(map.Count == 0)
+            {
+                r = 0;
+                g = 0;
+                b = 0;
+            }
+            else
+            {
+                r = (byte)(sumr / map.Count);
+                g = (byte)(sumg / map.Count);
+                b = (byte)(sumb / map.Count);
+            }
+
+            return new Pixel(r, g, b);
+        }
+
+
+        public byte[] OldCQ(byte[] pixels)
         {
             (byte red, byte green, byte blue, int ind)[] pix = new (byte, byte, byte, int)[pixels.Length / 4];
             for (int i = 0; i < pix.Length; i++) 
@@ -50,6 +146,53 @@ namespace CG_project1
                 pixels[p.ind*4 + 2] = p.blue;
             }
             return pixels;
+        }
+    }
+
+    internal class Pixel
+    {
+        public byte r { get; set; }
+        public byte g { get; set; }
+        public byte b { get; set; }
+
+        public Pixel(byte r, byte g, byte b)
+        {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+        }
+
+        public double distance(Pixel x)
+        {
+            double res = Math.Pow((r - x.r), 2) + Math.Pow((g - x.g), 2) + Math.Pow((b - x.b), 2);
+            return Math.Sqrt(res);
+        }
+
+        public (Pixel, double) FindNearest(Pixel[] arr)
+        {
+            double minDist = this.distance(arr[0]);
+            int minInd = 0;
+            double dist;
+            for(int i =  1; i < arr.Length; i++)
+            {
+                dist = this.distance(arr[i]);
+                if(dist < minDist)
+                {
+                    minInd = i;
+                    minDist = dist;
+                }
+            }
+            return (arr[minInd], minDist);
+        }
+
+        public static bool operator==(Pixel left, Pixel right)
+        {
+            return left.r==right.r && left.g==right.g && left.b==right.b;
+        }
+
+        public static bool operator!=(Pixel left, Pixel right)
+        {
+            return !(left==right);
         }
     }
 
